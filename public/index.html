@@ -1,1 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CODEXBD TERMINAL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            background: linear-gradient(135deg, #0a0e1a 0%, #0f1420 100%);
+            font-family: 'Courier New', 'Fira Code', monospace;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .terminal {
+            background: rgba(10, 14, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 255, 255, 0.1);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .terminal-title {
+            color: #00ffff;
+            font-weight: bold;
+            font-size: 1.2em;
+            letter-spacing: 2px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-led {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #00ff00;
+            animation: pulse 2s infinite;
+        }
+
+        .status-text {
+            color: #00ff00;
+            font-size: 0.8em;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .terminal-content {
+            padding: 30px;
+        }
+
+        .encrypted-badge {
+            text-align: center;
+            color: #ff4444;
+            font-size: 0.8em;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .message-area {
+            margin-bottom: 20px;
+        }
+
+        .message-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .message-input::placeholder {
+            color: rgba(0, 255, 255, 0.5);
+        }
+
+        .file-info {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px dashed rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-name {
+            color: #00ffff;
+            font-size: 0.9em;
+            word-break: break-all;
+            flex: 1;
+        }
+
+        .remove-file {
+            background: none;
+            border: none;
+            color: #ff4444;
+            cursor: pointer;
+            font-size: 20px;
+            margin-left: 10px;
+            transition: transform 0.2s;
+        }
+
+        .remove-file:hover {
+            transform: scale(1.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            padding: 12px 24px;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 10px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .btn:hover {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: #00ffff;
+        }
+
+        .btn-primary:hover {
+            background: rgba(0, 255, 255, 0.2);
+        }
+
+        .status-area {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.85em;
+        }
+
+        .status-message {
+            color: #00ff00;
+            word-break: break-word;
+        }
+
+        .status-error {
+            color: #ff4444;
+        }
+
+        .status-loading {
+            color: #ffff00;
+        }
+
+        .footer {
+            padding: 15px 20px;
+            border-top: 1px solid rgba(0, 255, 255, 0.3);
+            text-align: center;
+            color: rgba(0, 255, 255, 0.5);
+            font-size: 0.7em;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .terminal-content {
+                padding: 20px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal">
+        <div class="terminal-header">
+            <div class="terminal-title">CODEXBD TERMINAL</div>
+            <div class="status">
+                <div class="status-led"></div>
+                <div class="status-text">🔒 LINK ACTIVE</div>
+            </div>
+        </div>
+        
+        <div class="terminal-content">
+            <div class="encrypted-badge">
+                🔒 ENCRYPTED TRANSMISSION 🔒
+            </div>
+            
+            <div class="message-area">
+                <textarea class="message-input" id="messageInput" rows="4" placeholder="Type your message..."></textarea>
+            </div>
+            
+            <div class="file-info hidden" id="fileInfo">
+                <span class="file-name" id="fileName"></span>
+                <button class="remove-file" id="removeFileBtn">✕</button>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn" id="pickFileBtn">🔒 PICK ANY FILE</button>
+                <button class="btn btn-primary" id="sendBtn">🔄 SEND NOW</button>
+            </div>
+            
+            <div class="status-area" id="statusArea">
+                <div class="status-message" id="statusMessage">🔒 No file attached</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            🔒 SECURE END-TO-END ENCRYPTION • CODEXBD
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" style="display: none;">
+    
+    <script>
+        let selectedFile = null;
+        
+        const messageInput = document.getElementById('messageInput');
+        const fileInput = document.getElementById('fileInput');
+        const pickFileBtn = document.getElementById('pickFileBtn');
+        const sendBtn = document.getElementById('sendBtn');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const removeFileBtn = document.getElementById('removeFileBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        
+        pickFileBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                selectedFile = e.target.files[0];
+                fileName.textContent = selectedFile.name;
+                fileInfo.classList.remove('hidden');
+                updateStatus(`🔒 File attached: ${selectedFile.name}`, 'status-message');
+            }
+        });
+        
+        removeFileBtn.addEventListener('click', () => {
+            selectedFile = null;
+            fileInput.value = '';
+            fileInfo.classList.add('hidden');
+            updateStatus('🔒 No file attached', 'status-message');
+        });
+        
+        sendBtn.addEventListener('click', async () => {
+            const message = messageInput.value.trim();
+            
+            if (!message && !selectedFile) {
+                updateStatus('⚠️ Please enter a message or select a file', 'status-error');
+                return;
+            }
+            
+            sendBtn.disabled = true;
+            updateStatus('📡 Sending transmission...', 'status-loading');
+            
+            try {
+                const formData = new FormData();
+                if (message) formData.append('message', message);
+                if (selectedFile) formData.append('file', selectedFile);
+                
+                const response = await fetch('/api/send', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    updateStatus(`✅ Transmission successful! ${new Date().toLocaleTimeString()}`, 'status-message');
+                    messageInput.value = '';
+                    selectedFile = null;
+                    fileInput.value = '';
+                    fileInfo.classList.add('hidden');
+                } else {
+                    throw new Error(result.error || 'Transmission failed');
+                }
+            } catch (error) {
+                updateStatus(`❌ Transmission failed: ${error.message}`, 'status-error');
+            } finally {
+                sendBtn.disabled = false;
+            }
+        });
+        
+        function updateStatus(text, className) {
+            statusMessage.textContent = text;
+            statusMessage.className = className;
+        }
+        
+        // Check server health
+        async function checkHealth() {
+            try {
+                const response = await fetch('/api/health');
+                if (response.ok) {
+                    updateStatus('🔒 System ready • No file attached', 'status-message');
+                }
+            } catch (error) {
+                updateStatus('⚠️ Server connection issue', 'status-error');
+            }
+        }
+        
+        checkHealth();
+        setInterval(checkHealth, 30000);
+    </script>
+</body>
+</html>
